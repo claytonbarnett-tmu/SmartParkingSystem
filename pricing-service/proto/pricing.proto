@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package parking.pricing;
+
+service PricingService {
+  // Request a dynamic price quote for a parking lot.
+  rpc GetPrice (GetPriceRequest) returns (GetPriceResponse);
+
+  // Report whether the user booked or abandoned.
+  rpc RecordBookingOutcome (RecordBookingOutcomeRequest) returns (RecordBookingOutcomeResponse);
+}
+
+// ─── GetPrice ────────────────────────────────────────────────
+//
+// NOTE: All IDs are transmitted as strings for forward compatibility
+// with UUIDs.  The current ORM uses auto-increment integers, so the
+// server converts these to int internally.  When the team migrates
+// to UUID primary keys, only the server conversion layer needs to
+// change — the proto contract stays the same.
+
+message GetPriceRequest {
+  string lot_id     = 1;  // Parking lot identifier (currently numeric, will become UUID)
+  string user_id    = 2;  // User identifier (currently numeric, will become UUID)
+  string start_time = 3;  // ISO-8601 datetime
+  string end_time   = 4;  // ISO-8601 datetime
+}
+
+message GetPriceResponse {
+  double price_per_hour = 1;
+  string event_id       = 2;  // Pricing event identifier (currently numeric, will become UUID)
+  string context_key    = 3;
+  double base_price     = 4;
+  double multiplier     = 5;
+}
+
+// ─── RecordBookingOutcome ────────────────────────────────────
+
+message RecordBookingOutcomeRequest {
+  string event_id = 1;  // The event_id returned by GetPrice
+  bool   booked   = 2;
+}
+
+message RecordBookingOutcomeResponse {
+  bool success = 1;
+}

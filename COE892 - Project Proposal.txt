@@ -1,0 +1,111 @@
+﻿Course Title:
+	Distributed Cloud Computing
+	Course Number:
+	COE892
+	Semester/Year (e.g. F2017)
+	W2026
+	
+
+Instructor
+	Muhammad Jaseemuddin
+	
+
+Assignment/Lab Number: 
+	Project Proposal
+	Assignment/Lab Title: 
+	Project Proposal
+	
+
+Submission Date: 
+	Feb. 6, 2026
+	Due Date: 
+	Feb. 6, 2026
+	
+
+Student LAST Name 
+	Student FIRST Name 
+	Student Number 
+	Section
+	Signature* 
+	Yafaoui
+	Alaa
+	501052383
+	09
+	AY
+	Rahman
+	Nafia
+	500980434
+	09
+	N.R.
+	Nguyen
+	Andy
+	500888920
+	01
+	AN
+	Barnett
+	Clayton
+	501135145
+	09
+	C.B
+	
+
+*By signing above you attest that you have contributed to this written lab report and confirm that all work you have contributed to this lab report is your own work. Any suspicion of copying or plagiarism in this work will result in an investigation of Academic Misconduct and may result in a “0” on the work, an “F” in the course, or possibly more severe penalties, as well as a Disciplinary Notice on your academic record under the Student Code of Academic Conduct, which can be found online at: http://www.ryerson.ca/senate/current/pol60.pdf
+COE892 - Project Proposal - Group 14
+Problem:
+Finding parking is often inefficient and frustrating, especially in busy areas such as campuses, shopping centers, downtown locations, event venues, etc. Drivers usually have no way of knowing which parking spots are available, so they end up driving around searching for a space. This increases traffic, wastes time, causes unnecessary stress, and in some cases, it can even lead to conflicts between drivers competing for the same spot.
+
+
+From a driver’s point of view, the lack of real-time information and reservation options makes trip planning difficult. From a business or parking operator’s perspective, parking spaces are not always used efficiently. For example, during peak hours, demand is high and unmanaged, while during off-peak hours, many spaces remain unused. Without demand-based pricing, operators may lose revenue and have limited insight into parking patterns. These issues show the need for a Smart Parking System that can track availability in real time, allow reservations, and adjust pricing based on demand and peak hours.
+
+
+Solution:
+We will develop a distributed software project to allow drivers to see available parking spots and make reservations. Our proposed solution will be a microservice architecture, including a FastAPI component as an endpoint for end-users and RabbitMQ to receive sensor events. 
+The components of the project will be:
+* Simulated Sensors - The simulated sensors will send parking spot events (NowOccupied, NowAvailable) to the message queue.
+* MessageQueue - The message queue will receive events from the simulated sensors. These events will be consumed by the inventory service.
+* InventoryService - This service will hold and organize the state of all parking spots and reservations. It will consume events from the message queue and update the parking spot states accordingly. It will also have methods to expose this state to the FastAPI component, so that users can see which spots are available. 
+* PricingService - This service will use availability, reservation and time data to create dynamic pricing for parking spots.
+* FastAPI - This will be the API endpoint between the users and the backend. It will receive requests from users on the UI and retrieve availability and prices, as well as make reservation requests.
+* Mobile App - This will be a basic UI for drivers to see parking spot availability and pricing, and to make reservations.
+
+
+The course technologies and techniques will be used in the following ways:
+* RabbitMQ will be used as the message queue technology
+* FastAPI will be used as the API endpoint
+* Each service and component can be containerized and deployed separately on the cloud
+* FastAPI, pricing service and inventory service will have gRPC calls to connect them
+* There will be concurrency checks to ensure that parking spots can’t be double booked
+Timeline:
+Phase 1:
+(Feb 9 - 27)
+	(NR) Inventory service design, RabbitMQ consumer and availability updates | (AY) Creating a mobile app basic UI and REST endpoint definitions |(AN) Configure RabbitMQ exchange, queue, bindings; build and test simulated sensors, set up Docker Compose | (CB) Dynamic Pricing Logic
+	Phase 2:
+(Mar 2 - 13)
+	(NR) Reservation logic and gRPC integration | (AY) FastAPI: Calls, request/response schemas, and error handling| (AN) gRPC-to-Message Bridge, advanced sensor simulation, expand Docker Compose by adding Inventory container and connecting to RabbitMQ + DB | (CB) Pricing service and FastAPI gRPC integration 
+	Phase 3: (Mar 16 - 27)
+	(NR) Containerization and system integration | (AY) Container and any last-minute debugging| (AN) finalize Docker Compose with all services, container and system integration, test scaling | (CB) Container and system integration
+	Phase 4: (Mar 30 - Apr 10)
+	Project Demo, due in Week 12 and 13 (March 30 to April 10)| Project Code, due on March 30, 2026 | Final Project Report, 10 pages. Due on March 30, 2026
+	
+
+Team Member & Responsibilities:
+Alaa Yafaoui
+* FastAPI (with Clayton) 
+   * REST endpoint definitions, request/response schemas, error handling
+   * Container
+* Mobile App
+   * Basic UI
+   * Calls to FastAPI
+	Nafia Rahman
+* Develop the Inventory Service to track parking availability and reservations
+* Consume parking spot events from RabbitMQ
+* Implement reservation logic (holds, expiration, enforcement, double booking)
+* Provide a gRPC server for FastAPI and Pricing Service
+* Containerize the Inventory Service for deployment 
+	Andy Nguyen
+* RabbitMQ configuration (exchanges/queues/bindings): real-time distributed messaging for parking spot events
+* Simulated sensors: realistic "IoT" data to feed the system, multiple Python processes/threads/scripts simulating parking spots (e.g., 20–50 spots).  
+* System-wide container orchestration with DockerCompose or Kubernetes
+	Clayton Barnett 
+* Pricing Service: gRPC client to inventory service, gRPC server for FastAPI, dynamic pricing logic
+* FastAPI (with Alaa): gRPC clients to inventory and pricing service, aggregation logic
