@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package parking.inventory;
+
+service InventoryService {
+  rpc GetLotOccupancy(GetLotOccupancyRequest) returns (GetLotOccupancyResponse);
+  rpc ListSpots(ListSpotsRequest) returns (ListSpotsResponse);
+}
+
+message GetLotOccupancyRequest {
+  string lot_id = 1;
+}
+
+message GetLotOccupancyResponse {
+  string lot_id = 1;
+  int32 total_spots = 2;
+  int32 occupied_spots = 3;
+  int32 reserved_spots = 4;
+  int32 available_spots = 5;
+}
+
+message ListSpotsRequest {
+  string lot_id = 1;
+}
+
+message SpotStatus {
+  string spot_id = 1;
+  string label = 2;
+  string status = 3;
+  string last_updated = 4;
+}
+
+message ListSpotsResponse {
+  repeated SpotStatus spots = 1;
+}

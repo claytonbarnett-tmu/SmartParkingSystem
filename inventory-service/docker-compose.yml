@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory
+      POSTGRES_DB: inventory
+    ports:
+      - "5434:5432"  # host port avoids conflicts with local Postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inventory"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+
+  inventory:
+    build: .
+    command: ["python", "-m", "inventory.api"]
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://inventory:inventory@postgres:5432/inventory
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import socket; s=socket.create_connection(('localhost',8000),timeout=2); s.close()\""]
+      interval: 3s
+      timeout: 5s
+      retries: 10
