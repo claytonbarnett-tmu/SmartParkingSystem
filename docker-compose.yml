@@ -1,0 +1,91 @@
+version: '3.8'
+services:
+  inventory-service:
+    build:
+      context: ./inventory-service
+    container_name: inventory-service
+    ports:
+      - "50051:50051"
+    environment:
+      - GRPC_PORT=50051
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  pricing-service:
+    build:
+      context: ./pricing-service
+    container_name: pricing-service
+    ports:
+      - "50052:50052"
+    environment:
+      - GRPC_PORT=50052
+    depends_on:
+      - db
+    networks:
+      - backend
+
+  fastapi:
+    build:
+      context: ./FastAPI
+    container_name: fastapi
+    ports:
+      - "8000:8000"
+    environment:
+      - INVENTORY_GRPC_HOST=inventory-service
+      - INVENTORY_GRPC_PORT=50051
+      - PRICING_GRPC_HOST=pricing-service
+      - PRICING_GRPC_PORT=50052
+    depends_on:
+      - inventory-service
+      - pricing-service
+    networks:
+      - backend
+
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory
+      POSTGRES_DB: inventory
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-multi-db.sh:/docker-entrypoint-initdb.d/init-multi-db.sh:ro
+
+  seed-pricing:
+    build:
+      context: .
+      dockerfile: Dockerfile.seed-pricing
+    container_name: seed-pricing
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://parking:parking@db:5432/parking
+    networks:
+      - backend
+    restart: "no"
+
+  seed-inventory:
+    build:
+      context: .
+      dockerfile: Dockerfile.seed
+    depends_on:
+      - db
+    networks:
+      - backend
+    environment:
+      - DATABASE_URL=postgresql://inventory:inventory@db:5432/inventory
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  pgdata:

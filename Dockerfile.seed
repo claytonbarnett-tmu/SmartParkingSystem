@@ -1,0 +1,9 @@
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONPATH=/app
+COPY inventory-service/requirements.txt ./
+COPY inventory-service/inventory/ inventory_service/inventory/
+COPY inventory-service/proto/ inventory_service/proto/
+COPY seed_inventory.py ./
+RUN pip install --no-cache-dir -r requirements.txt
+CMD ["python", "/app/seed_inventory.py"]

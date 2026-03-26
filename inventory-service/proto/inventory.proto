@@ -5,7 +5,25 @@ package parking.inventory;
 service InventoryService {
   rpc GetLotOccupancy(GetLotOccupancyRequest) returns (GetLotOccupancyResponse);
   rpc ListSpots(ListSpotsRequest) returns (ListSpotsResponse);
+  rpc ReserveSpot(ReserveSpotRequest) returns (ReserveSpotResponse);
+  rpc ListReservations(ListReservationsRequest) returns (ListReservationsResponse);
+  // Use Case 4: List all parking lots and their addresses
+  rpc ListParkingLots(ListParkingLotsRequest) returns (ListParkingLotsResponse);
+  // Use Case 5: Create a new user
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
 }
+// Use Case 5: Create a new user
+message CreateUserRequest {
+  string username = 1;
+  string email = 2;
+}
+
+message CreateUserResponse {
+  bool success = 1;
+  string user_id = 2;
+  string message = 3;
+}
+
 
 message GetLotOccupancyRequest {
   string lot_id = 1;
@@ -32,4 +50,60 @@ message SpotStatus {
 
 message ListSpotsResponse {
   repeated SpotStatus spots = 1;
+}
+
+
+// Use Case 4: List all parking lots and their addresses
+message ListParkingLotsRequest {
+  // No fields needed for this request
+}
+
+message ParkingLotInfo {
+  string lot_id = 1;
+  string lot_name = 2;
+  string address = 3;
+}
+
+message ListParkingLotsResponse {
+  repeated ParkingLotInfo parking_lots = 1;
+}
+
+message ReserveSpotRequest {
+  string user_id = 1;
+  string lot_id = 2;
+  string event_id = 3;
+  string start_time = 4; // ISO 8601 string
+  string end_time = 5;   // ISO 8601 string
+  optional double price_at_booking = 6;
+}
+
+message ReserveSpotResponse {
+  string reservation_id = 1;
+  string spot_id = 2;
+  string lot_id = 3;
+  string user_id = 4;
+  string status = 5;
+  string start_time = 6;
+  string end_time = 7;
+  double price_at_booking = 8;
+  bool success = 9;
+  string failure_reason = 10;
+}
+
+message ListReservationsRequest {
+  string user_id = 1;
+}
+
+message ReservationInfo {
+  string reservation_id = 1;
+  string spot_id = 2;
+  string lot_id = 3;
+  string status = 4;
+  string start_time = 5;
+  string end_time = 6;
+  double price_at_booking = 7;
+}
+
+message ListReservationsResponse {
+  repeated ReservationInfo reservations = 1;
 }

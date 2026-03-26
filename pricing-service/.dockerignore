@@ -4,5 +4,4 @@ __pycache__/
 tests/
 .venv/
 *.md
-proto/
 generate_proto.sh

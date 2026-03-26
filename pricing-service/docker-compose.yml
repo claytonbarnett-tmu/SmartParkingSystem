@@ -18,7 +18,7 @@ services:
     ports:
       - "50052:50052"
     environment:
-      DATABASE_URL: postgresql://parking:parking@postgres:5432/parking
+      DATABASE_URL: postgresql://parking:parking@db:5432/parking
       GRPC_PORT: "50052"
     depends_on:
       postgres:

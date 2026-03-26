@@ -42,23 +42,28 @@ def _parse_int_id(raw: str, field_name: str, context) -> int:
         raise  # unreachable — satisfies type checker
 
 
+
 class PricingServicer(pricing_pb2_grpc.PricingServiceServicer):
     """Implements the PricingService gRPC interface."""
 
+
     def GetPrice(self, request, context):
         lot_id = _parse_int_id(request.lot_id, "lot_id", context)
-
+        user_id = request.user_id
         try:
             start_time = datetime.fromisoformat(request.start_time)
+            end_time = datetime.fromisoformat(request.end_time)
         except ValueError:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid start_time format")
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid start_time or end_time format")
             raise  # unreachable — satisfies type checker
 
         try:
             result = service.get_price(
                 lot_id=lot_id,
                 start_time=start_time,
-                occupancy_rate=0.5,  # TODO: call Inventory Service for real occupancy
+                end_time=end_time,
+                user_id=user_id,
+                occupancy_rate=request.occupancy_rate,
             )
         except Exception as exc:
             _LOG.exception("GetPrice failed")
@@ -66,27 +71,27 @@ class PricingServicer(pricing_pb2_grpc.PricingServiceServicer):
             raise  # unreachable — satisfies type checker
 
         return pricing_pb2.GetPriceResponse(
-            price_per_hour=result.final_price,
+            total_price=result.final_price,
             event_id=str(result.event_id),
-            context_key=result.context_key,
-            base_price=result.base_price,
-            multiplier=result.multiplier,
+            lot_id=str(result.lot_id),
+            start_time=result.start_time,
+            end_time=result.end_time,
         )
 
     def RecordBookingOutcome(self, request, context):
         event_id = _parse_int_id(request.event_id, "event_id", context)
+        user_id = request.user_id
+        price_offered = request.price_offered
+        booked = request.booked
 
-        try:
-            if request.booked:
-                service.confirm_booking(event_id)
-            else:
-                service.cancel_booking(event_id)
-        except Exception as exc:
-            _LOG.exception("RecordBookingOutcome failed")
-            context.abort(grpc.StatusCode.INTERNAL, str(exc))
-            raise  # unreachable — satisfies type checker
+        success, failure_reason = service.validate_and_record_booking_outcome(
+            event_id=event_id,
+            user_id=user_id,
+            price_offered=price_offered,
+            booked=booked,
+        )
+        return pricing_pb2.RecordBookingOutcomeResponse(success=success, failure_reason=failure_reason)
 
-        return pricing_pb2.RecordBookingOutcomeResponse(success=True)
 
 
 def serve():

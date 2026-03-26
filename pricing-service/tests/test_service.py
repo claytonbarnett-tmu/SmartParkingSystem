@@ -1,3 +1,6 @@
+
+            assert booked_status[results[0].event_id] is True
+            assert booked_status[results[1].event_id] is False
 """Tests for the high-level service interface (service.py).
 
 Each function in service.py acquires its own session via get_session(),
@@ -60,6 +63,7 @@ class TestGetPrice:
             result = get_price(
                 lot_id=1,
                 start_time=datetime(2026, 3, 4, 9, 0),
+                end_time=datetime(2026, 3, 4, 11, 0),
                 occupancy_rate=0.5,
             )
         assert isinstance(result, PriceSelection)
@@ -70,6 +74,7 @@ class TestGetPrice:
             result = get_price(
                 lot_id=1,
                 start_time=datetime(2026, 3, 4, 9, 0),
+                end_time=datetime(2026, 3, 4, 11, 0),
                 occupancy_rate=0.5,
             )
         assert result.final_price > 0
@@ -80,6 +85,7 @@ class TestGetPrice:
             result = get_price(
                 lot_id=1,
                 start_time=datetime(2026, 3, 4, 14, 0),
+                end_time=datetime(2026, 3, 4, 16, 0),
                 occupancy_rate=0.6,
             )
 
@@ -96,6 +102,7 @@ class TestConfirmBooking:
             result = get_price(
                 lot_id=1,
                 start_time=datetime(2026, 3, 4, 9, 0),
+                end_time=datetime(2026, 3, 4, 11, 0),
                 occupancy_rate=0.5,
             )
             confirm_booking(result.event_id)
@@ -106,64 +113,73 @@ class TestConfirmBooking:
         assert event.booked is True
         assert event.reward > 0.0
 
-    def test_updates_arm_alpha(self, session):
-        _seed(session)
-        with patch("pricing.service.get_session", return_value=session):
-            result = get_price(
-                lot_id=1,
-                start_time=datetime(2026, 3, 4, 9, 0),
-                occupancy_rate=0.5,
-            )
+        def test_updates_arm_alpha(self, session):
+            _seed(session)
+            with patch("pricing.service.get_session", return_value=session):
+                result = get_price(
+                    lot_id=1,
+                    start_time=datetime(2026, 3, 4, 9, 0),
+                    end_time=datetime(2026, 3, 4, 11, 0),
+                    occupancy_rate=0.5,
+                )
+                event = session.execute(
+                    select(PricingEvent).where(PricingEvent.event_id == result.event_id)
+                ).scalar_one()
+                arm_id = event.arm_id
+                arm_before = session.execute(
+                    select(BanditArm).where(BanditArm.arm_id == arm_id)
+                ).scalar_one()
+                alpha_before = arm_before.alpha
 
-            arm_before = session.execute(
-                select(BanditArm).where(BanditArm.arm_id == result.arm_id)
-            ).scalar_one()
-            alpha_before = arm_before.alpha
+                confirm_booking(result.event_id)
+                session.expire_all()
 
-            confirm_booking(result.event_id)
-            session.expire_all()
-
-        arm_after = session.execute(
-            select(BanditArm).where(BanditArm.arm_id == result.arm_id)
-        ).scalar_one()
-        assert arm_after.alpha > alpha_before
+                arm_after = session.execute(
+                    select(BanditArm).where(BanditArm.arm_id == arm_id)
+                ).scalar_one()
+                assert arm_after.alpha > alpha_before
 
 
 class TestCancelBooking:
-    def test_stays_unbooked(self, session):
-        _seed(session)
-        with patch("pricing.service.get_session", return_value=session):
-            result = get_price(
-                lot_id=1,
-                start_time=datetime(2026, 3, 4, 9, 0),
-                occupancy_rate=0.5,
-            )
-            cancel_booking(result.event_id)
+        def test_stays_unbooked(self, session):
+            _seed(session)
+            with patch("pricing.service.get_session", return_value=session):
+                result = get_price(
+                    lot_id=1,
+                    start_time=datetime(2026, 3, 4, 9, 0),
+                    end_time=datetime(2026, 3, 4, 11, 0),
+                    occupancy_rate=0.5,
+                )
+                cancel_booking(result.event_id)
 
-        event = session.execute(
-            select(PricingEvent).where(PricingEvent.event_id == result.event_id)
-        ).scalar_one()
-        assert event.booked is False
-        assert event.reward == 0.0
+                event = session.execute(
+                    select(PricingEvent).where(PricingEvent.event_id == result.event_id)
+                ).scalar_one()
+                assert event.booked is False
+                assert event.reward == 0.0
 
-    def test_increases_beta(self, session):
-        _seed(session)
-        with patch("pricing.service.get_session", return_value=session):
-            result = get_price(
-                lot_id=1,
-                start_time=datetime(2026, 3, 4, 9, 0),
-                occupancy_rate=0.5,
-            )
+        def test_increases_beta(self, session):
+            _seed(session)
+            with patch("pricing.service.get_session", return_value=session):
+                result = get_price(
+                    lot_id=1,
+                    start_time=datetime(2026, 3, 4, 9, 0),
+                    end_time=datetime(2026, 3, 4, 11, 0),
+                    occupancy_rate=0.5,
+                )
+                event = session.execute(
+                    select(PricingEvent).where(PricingEvent.event_id == result.event_id)
+                ).scalar_one()
+                arm_id = event.arm_id
+                arm_before = session.execute(
+                    select(BanditArm).where(BanditArm.arm_id == arm_id)
+                ).scalar_one()
+                beta_before = arm_before.beta_param
 
-            arm_before = session.execute(
-                select(BanditArm).where(BanditArm.arm_id == result.arm_id)
-            ).scalar_one()
-            beta_before = arm_before.beta_param
+                cancel_booking(result.event_id)
+                session.expire_all()
 
-            cancel_booking(result.event_id)
-            session.expire_all()
-
-        arm_after = session.execute(
-            select(BanditArm).where(BanditArm.arm_id == result.arm_id)
-        ).scalar_one()
-        assert arm_after.beta_param == beta_before + 1.0
+                arm_after = session.execute(
+                    select(BanditArm).where(BanditArm.arm_id == arm_id)
+                ).scalar_one()
+                assert arm_after.beta_param == beta_before + 1.0

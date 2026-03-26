@@ -116,7 +116,7 @@ The pricing event stays in the database with `booked = NULL`. The bandit paramet
 
 ---
 
-## 4. What the Pricing Algorithm Needs (Inventory Service)
+## 4. What the Pricing Algorithm Needs From Inventory Service
 
 The Pricing Service needs to call the Inventory Service to get the current occupancy rate for a lot before it can price it.
 

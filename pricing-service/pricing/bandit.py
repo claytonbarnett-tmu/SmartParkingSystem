@@ -123,27 +123,27 @@ class PriceSelection(NamedTuple):
     """Immutable result returned by :func:`select_price`.
 
     Attributes:
-        arm_id:      Primary key of the chosen :class:`~pricing.models.BanditArm`.
-        multiplier:  The price multiplier that was selected.
-        base_price:  The lot's base price at decision time.
-        final_price: ``base_price × multiplier`` — the price to show the user.
-        context_key: The context string used for arm lookup.
+        final_price: The total price to show the user.
         event_id:    Primary key of the logged :class:`~pricing.models.PricingEvent`.
-                     Must be passed back in :func:`record_booking` or
-                     :func:`record_no_booking` to close the feedback loop.
+        lot_id:      The lot id for which the price was generated.
+        user_id:     The user id for which the price was generated.
+        start_time:  The start time for the reservation (ISO string).
+        end_time:    The end time for the reservation (ISO string).
     """
-    arm_id: int
-    multiplier: float
-    base_price: float
     final_price: float
-    context_key: str
     event_id: int
+    lot_id: int
+    user_id: str
+    start_time: str
+    end_time: str
 
 
 def select_price(
     session: Session,
     lot_id: int,
-    current_time: datetime,
+    user_id: str,
+    start_time: datetime,
+    end_time: datetime,
     occupancy_rate: float,
 ) -> PriceSelection:
     """Run Thompson sampling to select a price for the given lot.
@@ -178,12 +178,20 @@ def select_price(
         sqlalchemy.exc.NoResultFound: If the lot has no
             :class:`~pricing.models.LotPricingConfig` entry.
     """
-    context_key = build_context_key(current_time, occupancy_rate)
+    context_key = build_context_key(start_time, occupancy_rate)
 
     # Fetch lot pricing config
-    config = session.execute(
-        select(LotPricingConfig).where(LotPricingConfig.lot_id == lot_id)
-    ).scalar_one()
+    print(f"[DEBUG] select_price: querying LotPricingConfig for lot_id={lot_id}")
+    configs = list(session.query(LotPricingConfig).all())
+    print(f"[DEBUG] select_price: all LotPricingConfig lot_ids: {[c.lot_id for c in configs]}")
+    try:
+        config = session.execute(
+            select(LotPricingConfig).where(LotPricingConfig.lot_id == lot_id)
+        ).scalar_one()
+        print(f"[DEBUG] select_price: found config for lot_id={lot_id}")
+    except Exception as e:
+        print(f"[DEBUG] select_price: FAILED to find config for lot_id={lot_id}: {e}")
+        raise
 
     # Fetch all arms for this (lot, context)
     arms: list[BanditArm] = list(
@@ -215,6 +223,7 @@ def select_price(
     # Log the pricing event
     event = PricingEvent(
         lot_id=lot_id,
+        user_id=user_id,
         arm_id=chosen_arm.arm_id,
         context_key=context_key,
         base_price=base_price,
@@ -227,12 +236,12 @@ def select_price(
     session.flush()  # populates event.event_id
 
     return PriceSelection(
-        arm_id=chosen_arm.arm_id,
-        multiplier=multiplier,
-        base_price=base_price,
         final_price=final_price,
-        context_key=context_key,
         event_id=event.event_id,
+        lot_id=lot_id,
+        user_id=user_id,
+        start_time=start_time.isoformat(),
+        end_time=end_time.isoformat(),
     )
 
 

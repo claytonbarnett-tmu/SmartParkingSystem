@@ -132,7 +132,6 @@ CREATE TABLE bandit_arms (
 CREATE TABLE lot_pricing_config (
     lot_id        INT PRIMARY KEY,
     base_price    NUMERIC(8,2) NOT NULL DEFAULT 4.00,  -- heuristic base $/hr
-    price_ceiling NUMERIC(8,2) NOT NULL DEFAULT 12.00, -- max possible price (for reward normalization)
     updated_at    TIMESTAMPTZ DEFAULT now()
 );
 

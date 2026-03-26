@@ -1,0 +1,260 @@
+﻿Smart Parking System
+
+
+  
+
+
+
+
+
+                        
+Course Title:
+	Distributed Cloud Computing
+	Course Number:
+	COE892
+	Semester/Year (e.g. F2017)
+	W2026
+	
+
+Instructor
+	Muhammad Jaseemuddin
+	
+
+Assignment/Lab Number: 
+	Project
+	Assignment/Lab Title: 
+	Project Interim Report
+	
+
+Submission Date: 
+	March 9, 2026
+	Due Date: 
+	March 9, 2026
+	
+
+Student LAST Name 
+	Student FIRST Name 
+	Student Number 
+	Section
+	Signature* 
+	Yafaoui
+	Alaa
+	501052383
+	09
+	AY
+	Rahman
+	Nafia
+	500980434
+	09
+	N.R.
+	Nguyen
+	Andy
+	500888920
+	01
+	AN
+	Barnett
+	Clayton
+	501135145
+	09
+	C.B
+	
+
+*By signing above you attest that you have contributed to this written lab report and confirm that all work you have contributed to this lab report is your own work. Any suspicion of copying or plagiarism in this work will result in an investigation of Academic Misconduct and may result in a “0” on the work, an “F” in the course, or possibly more severe penalties, as well as a Disciplinary Notice on your academic record under the Student Code of Academic Conduct, which can be found online at: http://www.ryerson.ca/senate/current/pol60.pdf                        
+
+
+
+
+COE892 - Project Interim Report - Group 14
+Abstract
+
+
+Urban areas face increasing challenges with traffic congestion and the inefficient use of parking space, which is often caused by drivers spending too much time searching for available parking. This project presents the development of a Smart Parking System, which leverages simulated Internet of Things (IoT) sensors to monitor parking space availability in real time. The system models parking spots as sensor-enabled units that continuously update their occupancy status, so drivers can see which parking spots are available.
+        
+The proposed solution has an interface which allows users to locate nearby parking spots and reserve them in advance. The system architecture integrates sensor simulation, backend services for data processing, and a user interface that communicates parking availability and reservation status. Also, a dynamic pricing mechanism is implemented to adjust parking fees based on demand levels and peak usage hours. This pricing strategy helps balance supply and demand across different time periods.
+
+
+The interim phase of the project focuses on the system architecture design, development of the sensor simulation environment, initial backend service implementation, and the prototype interface for user interaction. 
+
+
+Introduction 
+
+
+        The core problem this project addresses is the inefficient management and utilization of parking spaces in urban environments. The lack of real-time information creates an information dearth where drivers are unaware of available spots, and parking operators cannot dynamically manage their inventory. This leads to suboptimal user experiences, lost revenue for operators, and negative environmental impacts. There is a critical need for a system that can bridge the gap between physical parking infrastructure and the digital world, providing transparent, real-time data and intelligent management tools.
+
+
+        The primary goal of this project is to design, develop, and demonstrate a Smart Parking System that leverages Internet of Things (IoT) concepts to optimize parking resources. This overarching goal is broken down into the following specific objectives:
+
+
+* To Simulate an IoT-Enabled Parking Environment: Develop a simulation layer that mimics the behavior of real-world IoT sensors. This will generate a continuous stream of data representing the real-time occupancy status (available/occupied) of individual parking spots within a defined parking facility. This simulated environment serves as the foundation for testing and validating the system's logic without the need for costly physical hardware.
+* To Develop a User-Centric Interface for Drivers: Create an intuitive and accessible interface for mobile platforms that allows drivers to visualize the real-time parking availability on an interactive map. The interface will also allow them to find, select, and reserve a parking spot in advance.
+* To Implement a Dynamic Pricing Mechanism: Design and integrate a dynamic pricing engine that automatically adjusts the cost of parking based on real-time demand and historical usage patterns (peak hours). The goal of this mechanism is to use price as a lever to influence driver behavior, encouraging turnover in busy periods and attracting users during off-peak times
+Design 
+
+
+Overall Design
+
+
+The Smart Parking System has 6 main components: a frontend UI, a FastAPI web server, two microservices (inventory service and pricing service), a PostgreSQL database with two schemas for each microservice, and a RabbitMQ server to handle simulated sensor events (to simulate cars entering/leaving parking spaces). The inventory service connects to RabbitMQ to keep parking information up to date and stores it persistently in the database. The pricing service provides dynamic pricing. FastAPI is the bridge between the frontend and backend. The FastAPI and microservices communicate with each other using gRPC. All components (except the database) are designed to run in their own container. 
+
+Pricing Service
+
+
+The pricing service provides dynamic pricing for parking reservations based on the day, time and lot occupancy. It does this using a Reinforcement Learning (RL) approach called ‘multi-armed bandit with Thompson Sampling’. Essentially, this approach takes a base price for a parking lot and decides on a multiplier (e.g. ranging from 0.7 to 1.5) to apply to that base price. It decides on the multiplier by drawing a sample from each of the ‘bandit arms’, where each arm represents a multiplier. The arm with the highest sample is chosen to be the multiplier. The sample number from each arm is pseudo-random and depends on two parameters, alpha and beta, that are stored for each bandit arm. These parameters are updated, after the user either books a reservation at the given price or not, using a RL technique where the reward is the total revenue from the booking (e.g. 0 if the user didn’t book, or the given price if the user did book). A set of bandit arms is stored for each ‘context’, where a context includes time of day (morning/afternoon/evening/night), day type (weekday/weekend), occupancy level (low/medium/high) and parking lot. Essentially, the algorithm updates the parameters so that the multipliers that maximize revenue for a specific context are more likely to be chosen during that context. The RL parameters are stored, updated and retrieved in the pricing service schema in the database.
+Inventory Service
+
+
+The inventory service is responsible for keeping track of the state of parking spots and making that information available to other parts of the system. Its main role is to maintain which spots are available, occupied, or reserved, and allow users to make reservations safely. The service consumes sensor events from RabbitMQ, which update the current status of parking spots in the database. The state is stored in a PostgreSQL relational database so that the system can persist data and support reservation logic even if the service restarts. Additionally, the service exposes a FastAPI HTTP API that allows the frontend to query parking lots, view spot availability, and create reservations. It also exposes a gRPC interface so that the pricing service can request information about lot occupancy. 
+
+
+The core logic of the service handles sensor updates, reservation creation, and occupancy calculations. Sensor events update the status of a parking spot in the database. When a reservation request is made, the service checks that the spot is currently available and that there are no overlapping reservations for the same time window before confirming it. Once confirmed, the spot status is updated to reserved. The database schema includes tables for parking lots, parking spots, reservations, and users, with relationships between them to support reservation tracking and occupancy queries. Integration with the rest of the system will occur through the API endpoints, gRPC interface, and RabbitMQ consumer, which will allow sensor updates and pricing queries to interact with the inventory state.
+
+
+Mobile App
+
+
+The Android app serves as the primary user interface for the Smart Parking System, designed to streamline the experience of finding parking in high-demand areas. The design follows a clear, linear progression: upon launching the app, users are greeted with a minimalist Login Screen where they authenticate using their username and password. Once authenticated, the FastAPI layer acts as a bridge, communicating via gRPC with the Inventory Service to verify credentials and transition the user to the  Booking Form.
+UI/UX Workflow and Backend Integration
+
+
+The interface is designed to handle the following logic:
+
+
+* Dynamic Data Retrieval: The Booking Form provides fields for Lot ID and Spot ID,  implemented as dropdown menus, which are populated by querying the PostgreSQL database through the FastAPI endpoint. This ensures users only see actual, existing locations.
+* Real-Time State Management: As users input their desired Start Time and End Time, the backend uses RabbitMQ sensor events to ensure the chosen spot’s state is currently "NowAvailable."
+* Dynamic Pricing: The Price/hour field is not a static value; it is calculated by the Pricing Service using gRPC calls. This service analyzes current lot occupancy and peak-hour demand to provide a real-time quote before the user hits the "Book" button.
+* Concurrency & Persistence: When the "Book" button is pressed, the app sends a reservation request. The system performs a concurrency check to prevent double-booking, updates the PostgreSQL database, and confirms the reservation to the driver.
+
+
+Figure 1 is a template that represents how the app will look. When the app is first opened, it opens to the login screen. Once the user logs in to the app, they will go to another screen with the  Booking Form. 
+  
+
+Figure 1: App UI Template
+
+
+RabbitMQ Server
+
+
+The RabbitMQ server serves as the central message broker in the Smart Parking System, enabling an event-driven architecture that decouples the simulated IoT sensor layer from the backend processing logic. This component is critical for handling asynchronous, real-time updates from parking sensors like cars entering or leaving parking spaces without requiring direct, synchronous communication between the sensor simulators and the Inventory Service. In a real-world deployment, physical IoT sensors (e.g., ultrasonic, infrared, or camera-based detectors) would publish occupancy change events as soon as they detect a vehicle action. To simulate this behavior reliably and scalably during development and testing, the system uses RabbitMQ to mimic the pub/sub messaging pattern of IoT ecosystems. RabbitMQ acts as an intermediary that receives published events from one or more sensor simulation scripts or test harnesses, routes these events to durable, persistent queues using configurable exchanges, guarantees reliable delivery  through features such as message acknowledgments, durable queues, and persistent messages, and allows multiple consumers to process events independently if future scaling requires it (e.g., additional analytics or notification services).
+
+
+Sensor simulators do not need to know the location, implementation details, or availability of the Inventory Service. They simply publish events to a predefined exchange/topic. The Inventory Service consumes events at its own pace. If the service is temporarily down, restarted, or scaled, RabbitMQ buffers messages in the queue, preventing data loss and enabling replay upon recovery. RabbitMQ supports high-throughput messaging and can be clustered for production-grade availability. In this project, it runs in its own Docker container, aligning with the microservices/containerized approach. 
+
+
+Partial Implementation        
+
+
+Pricing Service
+
+
+The pricing service schema in the database includes the following tables: bandit_arms, lot_pricing_config, and pricing_events. The bandit_arms table stores bandit arm info (e.g. context and parameters). The lot-pricing_config stores the base price for each lot, and pricing_events stores booking events by users (which are used to update bandit parameters). The service then uses SQLAlchemy as an ORM. The database is initiated in the pricing service container, and the database connection code and ORM code are in database.py and models.py respectively.
+
+
+The file bandit.py stores the code to actually come up with a price, given a booking request. This code creates a context key based on the day, time and lot of the request, uses that key to retrieve the corresponding bandit parameters for that context from the database, and uses those bandit parameters to select a multiplier. It then applies that multiplier to the lot’s base price and uses that as the final price. The sampling from the bandit parameters is done using numpy’s beta sampling, which is designed to work with alpha and beta parameters such as those used in this bandit algorithm.
+
+
+The pricing.proto defines the exposed gRPC messages for the pricing service. These are: GetPrice (called by the FastAPI) and RecordBookingOutcomeRequest (also called by FastAPI, to confirm whether or not a user accepted a reservation at a specific price). The file server.py is the gRPC server for the pricing service. 
+Inventory Service
+
+
+The inventory service has been partially implemented and currently works in isolation. The codebase includes several main components: “api.py” for the FastAPI HTTP endpoints, “consumer.py” for the RabbitMQ consumer for reading sensor messages, “models.py” for the database schema, “server.py” for the gRPC server for external service queries, “service.py” for the service layer that contains the core reservation and occupancy logic, etc. The API currently supports endpoints for listing lots, viewing lot occupancy, listing spots, and creating reservations. These endpoints call the service layer, which performs the necessary database queries and validation checks before updating the system state. So far, the implementation has been tested locally with a PostgreSQL container and seeded test data. See screenshots in Figure 2 below for an example testing session. A test parking lot and several parking spots were created in the database. Using the FastAPI documentation interface, the API endpoints were tested to confirm that lots, spots, and occupancy information were returned correctly. Reservation requests were also tested, which successfully created reservations in the database and updated the spot status to reserved. 
+
+
+Testing FastAPI endpoints
+	  
+
+	  
+
+	  
+
+	
+
+Parking lot and spot data after adding a reservation
+	  
+
+	  
+
+
+
+
+
+	  
+
+	Figure 2: Testing FastAPI endpoints in Inventory Service
+
+
+At this stage, the service functions correctly on its own, but full integration with other components, such as the sensor pipeline and pricing service, is still in progress. Upcoming work will focus on integration with the rest of the services implemented by the team. Additionally, integration testing, stronger edge-case handling, and completion of the full reservation lifecycle, including cancellations, expirations, and spot release, will be implemented going forward.
+
+
+Mobile App
+The Android client's user interface is constructed natively using Jetpack Compose, Android's declarative UI toolkit. The flow consists of a standard login screen that uses Compose Navigation to smoothly transition the user to the main booking form. The application utilizes Compose Navigation to manage the flow between the authentication and booking screens. The booking interface is built with Material Design 3 components, incorporating OutlinedTextField and ExposedDropdownMenuBox elements for structured input. To optimize the user experience, time selection is handled by a native TimePicker encapsulated within a custom AlertDialog; the underlying text fields are configured as read-only and overlaid with a transparent, clickable surface to prevent the system keyboard from obstructing the dialogue. Network operations are executed off the main UI thread using Kotlin Coroutines. Upon form submission, the app constructs a Protobuf message and dispatches it via an asynchronous gRPC stub (BookingServiceCoroutineStub), dynamically updating the UI state to display loading indicators or transaction results based on the server's response. 
+Screenshots of the UX interface are shown in Figures 3 & 4.  Figure 3 shows that when the app first opens, it displays the login screen. Figure 4 shows that once the user logs in to the app, they will go to another screen with the  Booking Form. 
+At this point in time, there has not been integration with the backend yet. Implementation of FastAPI and gRPC will happen in the next phase.
+                                                       
+   Figure 3: Login Screen                                Figure 4: Booking Form
+
+
+
+
+RabbitMQ Server
+
+
+        The RabbitMQ server is configured with an exchange to which sensor simulators publish JSON-formatted messages, a dedicated queue bound to the exchange, with durability and persistence enabled. The Inventory Service, running in its own container, acts as the primary consumer: it connects via the AMQP protocol, declares the queue if needed, and processes incoming messages in a loop. Upon receiving an event, the service updates the corresponding parking spot's status in the PostgreSQL database and recalculates lot-level occupancy aggregates if necessary. No other services (e.g., Pricing Service, FastAPI gateway) directly consume from this queue in the current design. RabbitMQ handles sensor-to-inventory event flow exclusively. The FastAPI layer and gRPC interfaces remain synchronous for user-facing queries/reservations, while RabbitMQ enables the asynchronous, event-sourced nature of occupancy state changes. 
+
+
+RabbitMQ is deployed via Docker. Connection credentials, queue/exchange names, and routing keys are configured via environment variables or a configuration file for flexibility across development, testing, and potential deployment environments. During simulation, a separate Python/Node.js script acts as the "sensor publisher," periodically sending occupancy change events to mimic dynamic parking behavior.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+________________
+________________
+
+
+For the interim report, don’t believe the below are required:
+Contributions Made  
+Design Diagrams 
+Possible Future Work 
+Conclusions
+References
+Appendices
+
+
+
+
+________________
+
+
+Andy’s Introduction (keeping it for the future):
+Introduction 
+
+
+The rapid pace of urbanization has led to an increase in vehicle ownership, placing immense strain on urban infrastructure as a result. One of the most frustrating consequences of this trend is the challenge of parking. Drivers constantly circle city blocks in search of an available parking spot. This "cruising" for parking not only wastes valuable time and fuel for the individual driver but also contributes to increased carbon emissions, noise pollution, and overall driver frustration. Traditional parking systems, which rely on static information, are ill-equipped to handle this dynamic and growing problem, highlighting a clear need for a more intelligent and responsive solution.
+        The core problem this project addresses is the inefficient management and utilization of parking spaces in urban environments. The lack of real-time information creates an information dearth where drivers are unaware of available spots, and parking operators cannot dynamically manage their inventory. This leads to suboptimal user experiences, lost revenue for operators, and negative environmental impacts. There is a critical need for a system that can bridge the gap between physical parking infrastructure and the digital world, providing transparent, real-time data and intelligent management tools.
+
+
+        The primary goal of this project is to design, develop, and demonstrate a Smart Parking System that leverages Internet of Things (IoT) concepts to optimize parking resources. This overarching goal is broken down into the following specific objectives:
+
+
+To Simulate an IoT-Enabled Parking Environment: Develop a simulation layer that mimics the behavior of real-world IoT sensors. This will generate a continuous stream of data representing the real-time occupancy status (available/occupied) of individual parking spots within a defined parking facility. This simulated environment serves as the foundation for testing and validating the system's logic without the need for costly physical hardware deployment at this stage.
+To Develop a User-Centric Interface for Drivers: Create an intuitive and accessible interface for both web and mobile platforms that allows drivers to visualize the real-time parking availability on an interactive map. The interface will also allow them to find, select, and reserve a parking spot in advance.
+To Implement a Dynamic Pricing Mechanism: Design and integrate a dynamic pricing engine that automatically adjusts the cost of parking based on real-time demand and historical usage patterns (peak hours). The goal of this mechanism is to use price as a lever to influence driver behavior, encouraging turnover in busy periods and attracting users during off-peak times
+This project will focus on the development of a fully functional prototype that integrates all three core components mentioned above. The scope includes the design of the database schema, the development of the sensor data simulator, the creation of the front-end user interfaces, and the implementation of the back-end logic for reservations and dynamic pricing. The system will be developed using a modern software stack, with a cloud-based back-end to handle data processing and storage.
+The methodology will follow an iterative, agile-inspired approach. Development will be broken down into sprints, starting with the foundational data simulation layer, followed by the user interface, and finally the integration of the dynamic pricing module. Testing will be conducted at each stage, with the final phase involving an integrated system test to evaluate the performance of the dynamic pricing algorithm under various simulated demand scenarios. The project will conclude with an analysis of the system's effectiveness in achieving its stated goals and a discussion of potential future enhancements for real-world deployment.
+.
+
+
+                Page

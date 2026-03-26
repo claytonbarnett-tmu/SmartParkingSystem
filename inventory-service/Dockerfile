@@ -11,9 +11,12 @@ RUN apt-get update && \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 # Copy source code
 COPY inventory/ inventory/
 COPY proto/ proto/
+COPY seed_demo_data.py seed_demo_data.py
+
 
 # Generate gRPC bindings (keeps generated code in sync with proto)
 RUN python -m grpc_tools.protoc \
@@ -22,6 +25,10 @@ RUN python -m grpc_tools.protoc \
     --grpc_python_out=inventory/generated \
     proto/inventory.proto
 
-EXPOSE 8000
+# --- DEMO/TEST ONLY: Seed demo data. Remove the next line for production! ---
+RUN python seed_demo_data.py || true
 
-CMD ["python", "-m", "inventory.api"]
+ENV PYTHONPATH=/app:/app/inventory/generated:$PYTHONPATH
+EXPOSE 50051
+
+CMD ["python", "-m", "inventory.server"]

@@ -1,3 +1,4 @@
+
 """High-level pricing service interface.
 
 This module is the primary entry point for the Pricing Service's
@@ -27,30 +28,21 @@ from pricing.bandit import PriceSelection, record_booking, record_no_booking, se
 from pricing.database import get_session
 from pricing.seed import seed_lot
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_price(
     lot_id: int,
+    user_id: str,
     start_time: datetime,
+    end_time: datetime,
     occupancy_rate: float,
 ) -> PriceSelection:
-    """Compute a dynamic price for a parking lot.
-
-    Delegates to :func:`~pricing.bandit.select_price`, which runs
-    Thompson sampling and logs a :class:`~pricing.models.PricingEvent`.
-
-    Args:
-        lot_id:         Identifier of the parking lot.
-        start_time:     The requested reservation start time (used
-                        to determine the time-of-day context bucket).
-        occupancy_rate: Current fraction of occupied spots (0.0–1.0).
-
-    Returns:
-        A :class:`~pricing.bandit.PriceSelection` containing the
-        offered price and the ``event_id`` needed for feedback.
-    """
+    """Compute a dynamic price for a parking lot, optionally as part of a batch."""
     session = get_session()
     try:
-        result = select_price(session, lot_id, start_time, occupancy_rate)
+        result = select_price(session, lot_id, user_id, start_time, end_time, occupancy_rate)
         session.commit()
         return result
     except Exception:
@@ -58,6 +50,7 @@ def get_price(
         raise
     finally:
         session.close()
+
 
 
 def confirm_booking(event_id: int) -> None:
@@ -72,6 +65,7 @@ def confirm_booking(event_id: int) -> None:
     """
     session = get_session()
     try:
+        # Record booking for the selected event
         record_booking(session, event_id)
         session.commit()
     except Exception:
@@ -133,5 +127,39 @@ def initialize_lot(
     except Exception:
         session.rollback()
         raise
+    finally:
+        session.close()
+
+def validate_and_record_booking_outcome(event_id: int, user_id: str, price_offered: float, booked: bool) -> tuple[bool, str]:
+    """Validate event and securely record booking outcome. Returns (success, failure_reason)."""
+    session = get_session()
+    try:
+        from pricing.models import PricingEvent
+        event = session.query(PricingEvent).filter_by(event_id=event_id).one_or_none()
+        if event is None:
+            logger.info(f"Event not found: event_id={event_id}")
+            return False, "Event not found."
+        if event.booked:
+            logger.info(f"Event already updated: event_id={event_id}")
+            return False, "Event already updated."
+        if event.user_id != user_id:
+            logger.info(f"User ID mismatch: event_id={event_id}, event.user_id={event.user_id}, request.user_id={user_id}")
+            return False, "User ID does not match event."
+        if float(event.price_offered) != float(price_offered):
+            logger.info(f"Price mismatch: event_id={event_id}, event.price_offered={event.price_offered}, request.price_offered={price_offered}")
+            return False, "Price offered does not match event."
+        # Passed all checks, record outcome
+        if booked:
+            from pricing.bandit import record_booking
+            record_booking(session, event_id)
+        else:
+            from pricing.bandit import record_no_booking
+            record_no_booking(session, event_id)
+        session.commit()
+        return True, ""
+    except Exception as exc:
+        logger.exception(f"Exception in validate_and_record_booking_outcome: {exc}")
+        session.rollback()
+        return False, str(exc)
     finally:
         session.close()

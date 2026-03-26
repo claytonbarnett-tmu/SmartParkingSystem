@@ -6,6 +6,7 @@ service PricingService {
   // Request a dynamic price quote for a parking lot.
   rpc GetPrice (GetPriceRequest) returns (GetPriceResponse);
 
+
   // Report whether the user booked or abandoned.
   rpc RecordBookingOutcome (RecordBookingOutcomeRequest) returns (RecordBookingOutcomeResponse);
 }
@@ -23,23 +24,33 @@ message GetPriceRequest {
   string user_id    = 2;  // User identifier (currently numeric, will become UUID)
   string start_time = 3;  // ISO-8601 datetime
   string end_time   = 4;  // ISO-8601 datetime
+  double occupancy_rate = 5; // Fraction of spots currently occupied (0.0–1.0)
 }
 
+
 message GetPriceResponse {
-  double price_per_hour = 1;
-  string event_id       = 2;  // Pricing event identifier (currently numeric, will become UUID)
-  string context_key    = 3;
-  double base_price     = 4;
-  double multiplier     = 5;
+  double total_price = 1;
+  string event_id = 2;
+  string lot_id = 3;
+  string user_id = 4;
+  string start_time = 5;
+  string end_time = 6;
 }
+
+// ─── BatchGetPrice ─────────────────────────────────────────
+
+
 
 // ─── RecordBookingOutcome ────────────────────────────────────
 
 message RecordBookingOutcomeRequest {
-  string event_id = 1;  // The event_id returned by GetPrice
+  string event_id = 1;  
   bool   booked   = 2;
+  string user_id  = 3;
+  double price_offered = 4;
 }
 
 message RecordBookingOutcomeResponse {
   bool success = 1;
+  string failure_reason = 2;
 }

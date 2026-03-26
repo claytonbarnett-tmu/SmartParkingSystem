@@ -3,11 +3,11 @@ import time
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
 
-from inventory.models import Base
+from .models import Base
 
 DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql://inventory:inventory@localhost:5432/inventory",
+    "postgresql://inventory:inventory@db:5432/inventory",
 )
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)

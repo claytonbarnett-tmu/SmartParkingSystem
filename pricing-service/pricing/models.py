@@ -165,6 +165,7 @@ class PricingEvent(Base):
 
     event_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     lot_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    user_id: Mapped[str] = mapped_column(String(64), nullable=False)  # New: user identifier for the event
     arm_id: Mapped[Optional[int]] = mapped_column(
         Integer, nullable=True
     )
@@ -178,3 +179,4 @@ class PricingEvent(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
     )
+

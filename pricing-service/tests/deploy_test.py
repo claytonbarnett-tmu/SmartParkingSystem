@@ -47,6 +47,7 @@ def check_get_price(channel) -> dict:
         user_id="42",
         start_time="2026-03-04T09:00:00",
         end_time="2026-03-04T10:00:00",
+        occupancy_rate=0.5,
     ))
     ok = (
         resp.price_per_hour > 0

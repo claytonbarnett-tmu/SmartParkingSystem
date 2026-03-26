@@ -40,8 +40,9 @@ _LOG = logging.getLogger(__name__)
 
 DATABASE_URL = os.environ.get(
     "DATABASE_URL",
-    "postgresql://parking:parking@localhost:5432/parking",
+    "postgresql://parking:parking@db:5432/parking",
 )
+print(f"[DEBUG] DATABASE_URL in pricing/database.py: {DATABASE_URL}")
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(bind=engine)
