@@ -5,12 +5,13 @@ Run this script ONCE on a fresh database. Safe to re-run (will not duplicate lot
 from inventory.database import get_session
 from inventory.models import ParkingLot, ParkingSpot
 from sqlalchemy import select
-LOTS = [
-    {"lot_id": 1, "name": "Demo Lot A", "address": "123 Main St", "total_spots": 5},
-    {"lot_id": 2, "name": "Demo Lot B", "address": "456 Elm St", "total_spots": 3},
-]
 
-SPOTS_PER_LOT = 5
+# Add more spots for each lot for demo purposes
+LOTS = [
+    {"lot_id": 1, "name": "Demo Lot A", "address": "123 Main St", "total_spots": 8},
+    {"lot_id": 2, "name": "Demo Lot B", "address": "456 Elm St", "total_spots": 6},
+    {"lot_id": 3, "name": "Demo Lot C", "address": "789 Oak Ave", "total_spots": 4},
+]
 
 def main():
     session = get_session()

@@ -52,7 +52,26 @@ class CreateUserRequest(BaseModel):
     username: str
     email: str
 
+
 class CreateUserResponse(BaseModel):
     success: bool
     user_id: str | None = None
+    message: str | None = None
+
+# --- Use Case 6: User Login ---
+class LoginRequest(BaseModel):
+    username: str
+    email: str
+
+class LoginResponse(BaseModel):
+    success: bool
+    user_id: str | None = None
+    message: str | None = None
+
+class CancelReservationRequest(BaseModel):
+    user_id: str
+    reservation_id: str
+
+class CancelReservationResponse(BaseModel):
+    success: bool
     message: str | None = None

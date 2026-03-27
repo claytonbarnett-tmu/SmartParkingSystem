@@ -1,3 +1,38 @@
+## Use Case 7: User Cancels a Reservation
+
+**Scenario:**
+- **Request:** User provides their User ID and Reservation ID to cancel a reservation.
+
+**Component Responsibilities:**
+	- **Frontend:**
+		- Sends the User ID and Reservation ID to FastAPI to request cancellation.
+	- **FastAPI:**
+		- Receives the cancellation request from the frontend.
+		- Makes a gRPC call to the Inventory Service to attempt to cancel the reservation (passing user_id and reservation_id).
+		- Receives a boolean indicating success and a message from the Inventory Service.
+		- Returns the result (success/failure and message) to the frontend.
+	- **Inventory Service:**
+		- Receives the cancellation request via gRPC.
+		- Checks that the reservation exists, belongs to the user, and that the cancellation is at least one hour before the reservation start time.
+		- If valid, cancels the reservation and returns success.
+		- If not valid, returns failure and an appropriate message.
+
+**Result:**
+- System returns a success/failure boolean and message to the frontend for display to the user.
+
+### Call Flow (Detailed)
+
+1. **Frontend → FastAPI:**
+   - Sends API call with user_id and reservation_id to request cancellation.
+2. **FastAPI → Inventory Service:**
+   - Calls `CancelReservation` gRPC method (to be implemented) with user_id and reservation_id.
+3. **Inventory Service:**
+   - Checks the reservation and cancellation conditions.
+   - Returns success/failure boolean and message.
+4. **FastAPI → Frontend:**
+   - Returns the result to the frontend.
+
+---
 # Smart Parking System – Use Cases
 
 
@@ -149,7 +184,6 @@ IMPLEMENTED UP TO HERE
    - Returns the list to the frontend.
 
 ---
-
 ## Use Case 5: Create a New User
 
 **Scenario:**
@@ -182,5 +216,38 @@ IMPLEMENTED UP TO HERE
    - Returns the result to the frontend.
 - **Result:** System returns a success or failure message confirming the cancellation status.
 
+---
 
+## Use Case 6: User Logs In
+
+**Scenario:**
+- **Request:** User enters their username and email to log in.
+
+**Component Responsibilities:**
+	- **Frontend:**
+		- Sends the username and email to FastAPI via a login API endpoint.
+	- **FastAPI:**
+		- Receives the login request from the frontend.
+		- Makes a gRPC call to the Inventory Service to verify that the user exists in the database (new gRPC method required).
+		- Receives a boolean indicating success, and the user ID if successful, from the Inventory Service.
+		- Returns the result (success/failure and user ID if successful) to the frontend.
+	- **Inventory Service:**
+		- Receives the login verification request via gRPC.
+		- Checks the database for a user with the given username and email.
+		- Returns a boolean indicating whether the user exists, and the user ID if found.
+
+**Result:**
+- System returns a success/failure boolean and user ID (if successful) to the frontend for display or further use.
+
+### Call Flow (Detailed)
+
+1. **Frontend → FastAPI:**
+   - Sends API call with username and email to the login endpoint.
+2. **FastAPI → Inventory Service:**
+   - Calls `VerifyUser` gRPC method (to be implemented) with the username and email.
+3. **Inventory Service:**
+   - Checks the database for a matching user.
+   - Returns success/failure boolean and user ID (if successful).
+4. **FastAPI → Frontend:**
+   - Returns the result to the frontend.
 

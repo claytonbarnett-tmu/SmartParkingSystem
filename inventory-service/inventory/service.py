@@ -1,5 +1,6 @@
 from typing import Optional, Tuple
 import grpc
+import uuid
 from datetime import datetime
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Sequence
@@ -147,22 +148,27 @@ def reserve_spot(user_id: str, lot_id: int, spot_id: int, start_time: datetime, 
     finally:
         session.close()
 
-
-def cancel_reservation(reservation_id: int) -> Reservation:
+def cancel_reservation(user_id: str, reservation_id: str) -> Tuple[bool, str]:
     session = get_session()
     try:
-        reservation = session.get(Reservation, reservation_id)
-        if reservation is None:
-            raise ValueError(f"Reservation {reservation_id} not found")
-
+        # Ensure reservation_id is int for query
+        reservation = session.query(Reservation).filter(Reservation.reservation_id == int(reservation_id)).first()
+        if not reservation:
+            return False, "Reservation not found."
+        if str(reservation.user_id) != str(user_id):
+            return False, "Reservation does not belong to this user."
+        if getattr(reservation, "status", None) != "confirmed":
+            return False, "Reservation is not active or already cancelled."
+        # Check if cancellation is at least 1 hour before start time
+        now = datetime.utcnow()
+        if (reservation.start_time - now).total_seconds() < 3600:
+            return False, "Cancellations must be at least 1 hour before the reservation start time."
         setattr(reservation, "status", "cancelled")
-        session.add(reservation)
         session.commit()
-        session.refresh(reservation)
-        return reservation
-    except Exception:
+        return True, "Reservation cancelled successfully."
+    except Exception as exc:
         session.rollback()
-        raise
+        return False, f"Error during cancellation: {exc}"
     finally:
         session.close()
 
@@ -218,7 +224,6 @@ def create_user(username: str, email: str) -> tuple[bool, Optional[str], str]:
         if existing:
             return False, None, "Username or email already exists."
         # Create new user
-        import uuid
         user_id = str(uuid.uuid4())
         user = User(user_id=user_id, display_name=username, email=email)
         session.add(user)
@@ -227,5 +232,19 @@ def create_user(username: str, email: str) -> tuple[bool, Optional[str], str]:
     except Exception as exc:
         session.rollback()
         return False, None, f"Error: {exc}"
+    finally:
+        session.close()
+
+def verify_user(username: str, email: str) -> Tuple[bool, Optional[str], Optional[str]]:
+    session = get_session()
+    try:
+        user = session.query(User).filter(User.display_name == username, User.email == email).first()
+        if user:
+            user_id = str(user.user_id) if user.user_id is not None else None
+            return True, user_id, "User found."
+        else:
+            return False, None, "User not found."
+    except Exception as exc:
+        return False, None, f"Error during verification: {exc}"
     finally:
         session.close()

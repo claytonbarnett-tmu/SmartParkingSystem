@@ -24,7 +24,11 @@ class InventoryClient:
             reserved_spots=response.reserved_spots,
             available_spots=response.available_spots,
         )
-
+    def cancel_reservation(self, user_id: str, reservation_id: str):
+            request = inventory_pb2.CancelReservationRequest(user_id=user_id, reservation_id=reservation_id)
+            response = self.stub.CancelReservation(request)
+            return response
+    
     def reserve_spot(self, user_id: str, lot_id: int, event_id: str, start_time: str, end_time: str, price: float):
         request = inventory_pb2.ReserveSpotRequest(
             user_id=str(user_id),
@@ -57,4 +61,9 @@ class InventoryClient:
     def create_user(self, username: str, email: str):
         request = inventory_pb2.CreateUserRequest(username=username, email=email)
         response = self.stub.CreateUser(request)
+        return response
+    
+    def verify_user(self, username: str, email: str):
+        request = inventory_pb2.VerifyUserRequest(username=username, email=email)
+        response = self.stub.VerifyUser(request)
         return response

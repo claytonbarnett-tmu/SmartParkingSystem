@@ -24,43 +24,51 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0finventory.proto\x12\x11parking.inventory\"4\n\x11\x43reateUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\"G\n\x12\x43reateUserResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07user_id\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"(\n\x16GetLotOccupancyRequest\x12\x0e\n\x06lot_id\x18\x01 \x01(\t\"\x87\x01\n\x17GetLotOccupancyResponse\x12\x0e\n\x06lot_id\x18\x01 \x01(\t\x12\x13\n\x0btotal_spots\x18\x02 \x01(\x05\x12\x16\n\x0eoccupied_spots\x18\x03 \x01(\x05\x12\x16\n\x0ereserved_spots\x18\x04 \x01(\x05\x12\x17\n\x0f\x61vailable_spots\x18\x05 \x01(\x05\"\"\n\x10ListSpotsRequest\x12\x0e\n\x06lot_id\x18\x01 \x01(\t\"R\n\nSpotStatus\x12\x0f\n\x07spot_id\x18\x01 \x01(\t\x12\r\n\x05label\x18\x02 \x01(\t\x12\x0e\n\x06status\x18\x03 \x01(\t\x12\x14\n\x0clast_updated\x18\x04 \x01(\t\"A\n\x11ListSpotsResponse\x12,\n\x05spots\x18\x01 \x03(\x0b\x32\x1d.parking.inventory.SpotStatus\"\x18\n\x16ListParkingLotsRequest\"C\n\x0eParkingLotInfo\x12\x0e\n\x06lot_id\x18\x01 \x01(\t\x12\x10\n\x08lot_name\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\"R\n\x17ListParkingLotsResponse\x12\x37\n\x0cparking_lots\x18\x01 \x03(\x0b\x32!.parking.inventory.ParkingLotInfo\"\xa1\x01\n\x12ReserveSpotRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x0e\n\x06lot_id\x18\x02 \x01(\t\x12\x10\n\x08\x65vent_id\x18\x03 \x01(\t\x12\x12\n\nstart_time\x18\x04 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x05 \x01(\t\x12\x1d\n\x10price_at_booking\x18\x06 \x01(\x01H\x00\x88\x01\x01\x42\x13\n\x11_price_at_booking\"\xd8\x01\n\x13ReserveSpotResponse\x12\x16\n\x0ereservation_id\x18\x01 \x01(\t\x12\x0f\n\x07spot_id\x18\x02 \x01(\t\x12\x0e\n\x06lot_id\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x0e\n\x06status\x18\x05 \x01(\t\x12\x12\n\nstart_time\x18\x06 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x07 \x01(\t\x12\x18\n\x10price_at_booking\x18\x08 \x01(\x01\x12\x0f\n\x07success\x18\t \x01(\x08\x12\x16\n\x0e\x66\x61ilure_reason\x18\n \x01(\t\"*\n\x17ListReservationsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"\x9a\x01\n\x0fReservationInfo\x12\x16\n\x0ereservation_id\x18\x01 \x01(\t\x12\x0f\n\x07spot_id\x18\x02 \x01(\t\x12\x0e\n\x06lot_id\x18\x03 \x01(\t\x12\x0e\n\x06status\x18\x04 \x01(\t\x12\x12\n\nstart_time\x18\x05 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x06 \x01(\t\x12\x18\n\x10price_at_booking\x18\x07 \x01(\x01\"T\n\x18ListReservationsResponse\x12\x38\n\x0creservations\x18\x01 \x03(\x0b\x32\".parking.inventory.ReservationInfo2\xe4\x04\n\x10InventoryService\x12h\n\x0fGetLotOccupancy\x12).parking.inventory.GetLotOccupancyRequest\x1a*.parking.inventory.GetLotOccupancyResponse\x12V\n\tListSpots\x12#.parking.inventory.ListSpotsRequest\x1a$.parking.inventory.ListSpotsResponse\x12\\\n\x0bReserveSpot\x12%.parking.inventory.ReserveSpotRequest\x1a&.parking.inventory.ReserveSpotResponse\x12k\n\x10ListReservations\x12*.parking.inventory.ListReservationsRequest\x1a+.parking.inventory.ListReservationsResponse\x12h\n\x0fListParkingLots\x12).parking.inventory.ListParkingLotsRequest\x1a*.parking.inventory.ListParkingLotsResponse\x12Y\n\nCreateUser\x12$.parking.inventory.CreateUserRequest\x1a%.parking.inventory.CreateUserResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0finventory.proto\x12\x11parking.inventory\"C\n\x18\x43\x61ncelReservationRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x16\n\x0ereservation_id\x18\x02 \x01(\t\"=\n\x19\x43\x61ncelReservationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\"4\n\x11VerifyUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\"G\n\x12VerifyUserResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07user_id\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"4\n\x11\x43reateUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\"G\n\x12\x43reateUserResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07user_id\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"(\n\x16GetLotOccupancyRequest\x12\x0e\n\x06lot_id\x18\x01 \x01(\t\"\x87\x01\n\x17GetLotOccupancyResponse\x12\x0e\n\x06lot_id\x18\x01 \x01(\t\x12\x13\n\x0btotal_spots\x18\x02 \x01(\x05\x12\x16\n\x0eoccupied_spots\x18\x03 \x01(\x05\x12\x16\n\x0ereserved_spots\x18\x04 \x01(\x05\x12\x17\n\x0f\x61vailable_spots\x18\x05 \x01(\x05\"\"\n\x10ListSpotsRequest\x12\x0e\n\x06lot_id\x18\x01 \x01(\t\"R\n\nSpotStatus\x12\x0f\n\x07spot_id\x18\x01 \x01(\t\x12\r\n\x05label\x18\x02 \x01(\t\x12\x0e\n\x06status\x18\x03 \x01(\t\x12\x14\n\x0clast_updated\x18\x04 \x01(\t\"A\n\x11ListSpotsResponse\x12,\n\x05spots\x18\x01 \x03(\x0b\x32\x1d.parking.inventory.SpotStatus\"\x18\n\x16ListParkingLotsRequest\"C\n\x0eParkingLotInfo\x12\x0e\n\x06lot_id\x18\x01 \x01(\t\x12\x10\n\x08lot_name\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x64\x64ress\x18\x03 \x01(\t\"R\n\x17ListParkingLotsResponse\x12\x37\n\x0cparking_lots\x18\x01 \x03(\x0b\x32!.parking.inventory.ParkingLotInfo\"\xa1\x01\n\x12ReserveSpotRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x0e\n\x06lot_id\x18\x02 \x01(\t\x12\x10\n\x08\x65vent_id\x18\x03 \x01(\t\x12\x12\n\nstart_time\x18\x04 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x05 \x01(\t\x12\x1d\n\x10price_at_booking\x18\x06 \x01(\x01H\x00\x88\x01\x01\x42\x13\n\x11_price_at_booking\"\xd8\x01\n\x13ReserveSpotResponse\x12\x16\n\x0ereservation_id\x18\x01 \x01(\t\x12\x0f\n\x07spot_id\x18\x02 \x01(\t\x12\x0e\n\x06lot_id\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\t\x12\x0e\n\x06status\x18\x05 \x01(\t\x12\x12\n\nstart_time\x18\x06 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x07 \x01(\t\x12\x18\n\x10price_at_booking\x18\x08 \x01(\x01\x12\x0f\n\x07success\x18\t \x01(\x08\x12\x16\n\x0e\x66\x61ilure_reason\x18\n \x01(\t\"*\n\x17ListReservationsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\"\x9a\x01\n\x0fReservationInfo\x12\x16\n\x0ereservation_id\x18\x01 \x01(\t\x12\x0f\n\x07spot_id\x18\x02 \x01(\t\x12\x0e\n\x06lot_id\x18\x03 \x01(\t\x12\x0e\n\x06status\x18\x04 \x01(\t\x12\x12\n\nstart_time\x18\x05 \x01(\t\x12\x10\n\x08\x65nd_time\x18\x06 \x01(\t\x12\x18\n\x10price_at_booking\x18\x07 \x01(\x01\"T\n\x18ListReservationsResponse\x12\x38\n\x0creservations\x18\x01 \x03(\x0b\x32\".parking.inventory.ReservationInfo2\xaf\x06\n\x10InventoryService\x12h\n\x0fGetLotOccupancy\x12).parking.inventory.GetLotOccupancyRequest\x1a*.parking.inventory.GetLotOccupancyResponse\x12V\n\tListSpots\x12#.parking.inventory.ListSpotsRequest\x1a$.parking.inventory.ListSpotsResponse\x12\\\n\x0bReserveSpot\x12%.parking.inventory.ReserveSpotRequest\x1a&.parking.inventory.ReserveSpotResponse\x12k\n\x10ListReservations\x12*.parking.inventory.ListReservationsRequest\x1a+.parking.inventory.ListReservationsResponse\x12h\n\x0fListParkingLots\x12).parking.inventory.ListParkingLotsRequest\x1a*.parking.inventory.ListParkingLotsResponse\x12Y\n\nCreateUser\x12$.parking.inventory.CreateUserRequest\x1a%.parking.inventory.CreateUserResponse\x12Y\n\nVerifyUser\x12$.parking.inventory.VerifyUserRequest\x1a%.parking.inventory.VerifyUserResponse\x12n\n\x11\x43\x61ncelReservation\x12+.parking.inventory.CancelReservationRequest\x1a,.parking.inventory.CancelReservationResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'inventory_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_CREATEUSERREQUEST']._serialized_start=38
-  _globals['_CREATEUSERREQUEST']._serialized_end=90
-  _globals['_CREATEUSERRESPONSE']._serialized_start=92
-  _globals['_CREATEUSERRESPONSE']._serialized_end=163
-  _globals['_GETLOTOCCUPANCYREQUEST']._serialized_start=165
-  _globals['_GETLOTOCCUPANCYREQUEST']._serialized_end=205
-  _globals['_GETLOTOCCUPANCYRESPONSE']._serialized_start=208
-  _globals['_GETLOTOCCUPANCYRESPONSE']._serialized_end=343
-  _globals['_LISTSPOTSREQUEST']._serialized_start=345
-  _globals['_LISTSPOTSREQUEST']._serialized_end=379
-  _globals['_SPOTSTATUS']._serialized_start=381
-  _globals['_SPOTSTATUS']._serialized_end=463
-  _globals['_LISTSPOTSRESPONSE']._serialized_start=465
-  _globals['_LISTSPOTSRESPONSE']._serialized_end=530
-  _globals['_LISTPARKINGLOTSREQUEST']._serialized_start=532
-  _globals['_LISTPARKINGLOTSREQUEST']._serialized_end=556
-  _globals['_PARKINGLOTINFO']._serialized_start=558
-  _globals['_PARKINGLOTINFO']._serialized_end=625
-  _globals['_LISTPARKINGLOTSRESPONSE']._serialized_start=627
-  _globals['_LISTPARKINGLOTSRESPONSE']._serialized_end=709
-  _globals['_RESERVESPOTREQUEST']._serialized_start=712
-  _globals['_RESERVESPOTREQUEST']._serialized_end=873
-  _globals['_RESERVESPOTRESPONSE']._serialized_start=876
-  _globals['_RESERVESPOTRESPONSE']._serialized_end=1092
-  _globals['_LISTRESERVATIONSREQUEST']._serialized_start=1094
-  _globals['_LISTRESERVATIONSREQUEST']._serialized_end=1136
-  _globals['_RESERVATIONINFO']._serialized_start=1139
-  _globals['_RESERVATIONINFO']._serialized_end=1293
-  _globals['_LISTRESERVATIONSRESPONSE']._serialized_start=1295
-  _globals['_LISTRESERVATIONSRESPONSE']._serialized_end=1379
-  _globals['_INVENTORYSERVICE']._serialized_start=1382
-  _globals['_INVENTORYSERVICE']._serialized_end=1994
+  _globals['_CANCELRESERVATIONREQUEST']._serialized_start=38
+  _globals['_CANCELRESERVATIONREQUEST']._serialized_end=105
+  _globals['_CANCELRESERVATIONRESPONSE']._serialized_start=107
+  _globals['_CANCELRESERVATIONRESPONSE']._serialized_end=168
+  _globals['_VERIFYUSERREQUEST']._serialized_start=170
+  _globals['_VERIFYUSERREQUEST']._serialized_end=222
+  _globals['_VERIFYUSERRESPONSE']._serialized_start=224
+  _globals['_VERIFYUSERRESPONSE']._serialized_end=295
+  _globals['_CREATEUSERREQUEST']._serialized_start=297
+  _globals['_CREATEUSERREQUEST']._serialized_end=349
+  _globals['_CREATEUSERRESPONSE']._serialized_start=351
+  _globals['_CREATEUSERRESPONSE']._serialized_end=422
+  _globals['_GETLOTOCCUPANCYREQUEST']._serialized_start=424
+  _globals['_GETLOTOCCUPANCYREQUEST']._serialized_end=464
+  _globals['_GETLOTOCCUPANCYRESPONSE']._serialized_start=467
+  _globals['_GETLOTOCCUPANCYRESPONSE']._serialized_end=602
+  _globals['_LISTSPOTSREQUEST']._serialized_start=604
+  _globals['_LISTSPOTSREQUEST']._serialized_end=638
+  _globals['_SPOTSTATUS']._serialized_start=640
+  _globals['_SPOTSTATUS']._serialized_end=722
+  _globals['_LISTSPOTSRESPONSE']._serialized_start=724
+  _globals['_LISTSPOTSRESPONSE']._serialized_end=789
+  _globals['_LISTPARKINGLOTSREQUEST']._serialized_start=791
+  _globals['_LISTPARKINGLOTSREQUEST']._serialized_end=815
+  _globals['_PARKINGLOTINFO']._serialized_start=817
+  _globals['_PARKINGLOTINFO']._serialized_end=884
+  _globals['_LISTPARKINGLOTSRESPONSE']._serialized_start=886
+  _globals['_LISTPARKINGLOTSRESPONSE']._serialized_end=968
+  _globals['_RESERVESPOTREQUEST']._serialized_start=971
+  _globals['_RESERVESPOTREQUEST']._serialized_end=1132
+  _globals['_RESERVESPOTRESPONSE']._serialized_start=1135
+  _globals['_RESERVESPOTRESPONSE']._serialized_end=1351
+  _globals['_LISTRESERVATIONSREQUEST']._serialized_start=1353
+  _globals['_LISTRESERVATIONSREQUEST']._serialized_end=1395
+  _globals['_RESERVATIONINFO']._serialized_start=1398
+  _globals['_RESERVATIONINFO']._serialized_end=1552
+  _globals['_LISTRESERVATIONSRESPONSE']._serialized_start=1554
+  _globals['_LISTRESERVATIONSRESPONSE']._serialized_end=1638
+  _globals['_INVENTORYSERVICE']._serialized_start=1641
+  _globals['_INVENTORYSERVICE']._serialized_end=2456
 # @@protoc_insertion_point(module_scope)

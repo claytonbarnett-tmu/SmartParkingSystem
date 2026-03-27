@@ -11,7 +11,36 @@ service InventoryService {
   rpc ListParkingLots(ListParkingLotsRequest) returns (ListParkingLotsResponse);
   // Use Case 5: Create a new user
   rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  // Use Case 6: Verify user for login
+  rpc VerifyUser(VerifyUserRequest) returns (VerifyUserResponse);
+  // Use Case 7: Cancel reservation
+  rpc CancelReservation(CancelReservationRequest) returns (CancelReservationResponse);
 }
+
+// Use Case 7: Cancel Reservation
+message CancelReservationRequest {
+  string user_id = 1;
+  string reservation_id = 2;
+}
+
+message CancelReservationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+
+// Use Case 6: User Login Verification
+message VerifyUserRequest {
+  string username = 1;
+  string email = 2;
+}
+
+message VerifyUserResponse {
+  bool success = 1;
+  string user_id = 2;
+  string message = 3;
+}
+
 // Use Case 5: Create a new user
 message CreateUserRequest {
   string username = 1;

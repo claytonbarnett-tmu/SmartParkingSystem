@@ -149,11 +149,9 @@ def validate_and_record_booking_outcome(event_id: int, user_id: str, price_offer
             logger.info(f"Price mismatch: event_id={event_id}, event.price_offered={event.price_offered}, request.price_offered={price_offered}")
             return False, "Price offered does not match event."
         # Passed all checks, record outcome
-        if booked:
-            from pricing.bandit import record_booking
+        if booked:      
             record_booking(session, event_id)
         else:
-            from pricing.bandit import record_no_booking
             record_no_booking(session, event_id)
         session.commit()
         return True, ""

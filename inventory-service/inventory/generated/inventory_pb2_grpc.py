@@ -64,6 +64,16 @@ class InventoryServiceStub(object):
                 request_serializer=inventory__pb2.CreateUserRequest.SerializeToString,
                 response_deserializer=inventory__pb2.CreateUserResponse.FromString,
                 _registered_method=True)
+        self.VerifyUser = channel.unary_unary(
+                '/parking.inventory.InventoryService/VerifyUser',
+                request_serializer=inventory__pb2.VerifyUserRequest.SerializeToString,
+                response_deserializer=inventory__pb2.VerifyUserResponse.FromString,
+                _registered_method=True)
+        self.CancelReservation = channel.unary_unary(
+                '/parking.inventory.InventoryService/CancelReservation',
+                request_serializer=inventory__pb2.CancelReservationRequest.SerializeToString,
+                response_deserializer=inventory__pb2.CancelReservationResponse.FromString,
+                _registered_method=True)
 
 
 class InventoryServiceServicer(object):
@@ -107,6 +117,20 @@ class InventoryServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def VerifyUser(self, request, context):
+        """Use Case 6: Verify user for login
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def CancelReservation(self, request, context):
+        """Use Case 7: Cancel reservation
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_InventoryServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -139,6 +163,16 @@ def add_InventoryServiceServicer_to_server(servicer, server):
                     servicer.CreateUser,
                     request_deserializer=inventory__pb2.CreateUserRequest.FromString,
                     response_serializer=inventory__pb2.CreateUserResponse.SerializeToString,
+            ),
+            'VerifyUser': grpc.unary_unary_rpc_method_handler(
+                    servicer.VerifyUser,
+                    request_deserializer=inventory__pb2.VerifyUserRequest.FromString,
+                    response_serializer=inventory__pb2.VerifyUserResponse.SerializeToString,
+            ),
+            'CancelReservation': grpc.unary_unary_rpc_method_handler(
+                    servicer.CancelReservation,
+                    request_deserializer=inventory__pb2.CancelReservationRequest.FromString,
+                    response_serializer=inventory__pb2.CancelReservationResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -303,6 +337,60 @@ class InventoryService(object):
             '/parking.inventory.InventoryService/CreateUser',
             inventory__pb2.CreateUserRequest.SerializeToString,
             inventory__pb2.CreateUserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def VerifyUser(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/parking.inventory.InventoryService/VerifyUser',
+            inventory__pb2.VerifyUserRequest.SerializeToString,
+            inventory__pb2.VerifyUserResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def CancelReservation(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/parking.inventory.InventoryService/CancelReservation',
+            inventory__pb2.CancelReservationRequest.SerializeToString,
+            inventory__pb2.CancelReservationResponse.FromString,
             options,
             channel_credentials,
             insecure,

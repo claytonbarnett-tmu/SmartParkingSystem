@@ -38,6 +38,15 @@ def _parse_int_id(raw: str, field_name: str, context) -> int:
 
 class InventoryServicer(inventory_pb2_grpc.InventoryServiceServicer):
 
+    def CancelReservation(self, request, context):
+        user_id = request.user_id
+        reservation_id = request.reservation_id
+        success, message = service.cancel_reservation(user_id, reservation_id)
+        return inventory_pb2.CancelReservationResponse(
+            success=success,
+            message=message or ""
+        )
+
     def CreateUser(self, request, context):
         username = request.username
         email = request.email
@@ -123,6 +132,16 @@ class InventoryServicer(inventory_pb2_grpc.InventoryServiceServicer):
             ]
         )
 
+    def VerifyUser(self, request, context):
+        username = request.username
+        email = request.email
+        success, user_id, message = service.verify_user(username, email)
+        return inventory_pb2.VerifyUserResponse(
+            success=success,
+            user_id=user_id or "",
+            message=message or ""
+        )
+
     def ReserveSpot(self, request, context):
         lot_id = _parse_int_id(request.lot_id, "lot_id", context)
         spot_id = None
@@ -197,6 +216,8 @@ def serve() -> None:
     signal.signal(signal.SIGTERM, _stop)
     signal.signal(signal.SIGINT, _stop)
     server.wait_for_termination()
+
+
 
 
 if __name__ == "__main__":
