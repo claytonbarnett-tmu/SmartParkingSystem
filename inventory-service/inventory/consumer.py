@@ -1,4 +1,5 @@
 import json
+import os
 import pika
 
 from inventory import service
@@ -17,9 +18,11 @@ def _on_message(channel, method, properties, body):
 
 
 def run(
-    rabbitmq_url: str = "amqp://guest:guest@localhost:5672/",
-    queue_name: str = "sensor_events",
+    rabbitmq_url: str | None = None,
+    queue_name: str | None = None,
 ):
+    rabbitmq_url = rabbitmq_url or os.getenv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/")
+    queue_name = queue_name or os.getenv("RABBITMQ_QUEUE", "sensor_events")
     params = pika.URLParameters(rabbitmq_url)
     connection = pika.BlockingConnection(params)
     channel = connection.channel()

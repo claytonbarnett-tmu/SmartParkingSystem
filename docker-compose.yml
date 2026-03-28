@@ -59,6 +59,49 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./init-multi-db.sh:/docker-entrypoint-initdb.d/init-multi-db.sh:ro
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - backend
+    restart: unless-stopped
+
+  inventory-consumer:
+    build:
+      context: ./inventory-service
+    container_name: inventory-consumer
+    restart: always
+    command: ["python", "-m", "inventory.consumer"]
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_QUEUE=sensor_events
+      - DATABASE_URL=postgresql://inventory:inventory@db:5432/inventory
+    depends_on:
+      - rabbitmq
+      - db
+      - sensor-simulator
+    networks:
+      - backend
+
+  sensor-simulator:
+    build:
+      context: ./sensor-simulator
+    container_name: sensor-simulator
+    restart: always
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - RABBITMQ_QUEUE=sensor_events
+      - LOT_IDS=1,2
+      - SPOT_IDS=1,2,3,4,5,6,7,8,9,10
+      - PUBLISH_INTERVAL_SECONDS=5
+    depends_on:
+      - rabbitmq
+    networks:
+      - backend
+
   seed-pricing:
     build:
       context: .

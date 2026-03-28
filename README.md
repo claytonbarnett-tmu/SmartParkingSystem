@@ -30,6 +30,8 @@ See [documentation/architecture.md](documentation/architecture.md) for diagrams 
 - `FastAPI/` – API gateway, REST endpoints, gRPC clients
 - `inventory-service/` – Inventory microservice (lots, spots, reservations)
 - `pricing-service/` – Pricing microservice (RL bandit, dynamic pricing)
+- `sensor-simulator/` – Simulated IoT sensor event publisher
+- `RabbitMQ` – Event bus for sensor events
 - `documentation/` – Architecture, use-cases, integration guides
 
 ## Documentation
