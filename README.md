@@ -19,12 +19,7 @@ See [documentation/architecture.md](documentation/architecture.md) for diagrams 
 	```sh
 	docker compose up --build
 	```
-3. Seed demo data (if needed):
-	```sh
-	docker compose exec inventory-service python seed_demo_data.py
-	docker compose exec pricing-service python seed_pricing.py
-	```
-4. Access FastAPI at [http://localhost:8000/docs](http://localhost:8000/docs)
+3. Access FastAPI at [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ## Services
 - `FastAPI/` – API gateway, REST endpoints, gRPC clients
