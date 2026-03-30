@@ -10,7 +10,7 @@ LOT_IDS = [int(x) for x in os.getenv("LOT_IDS", "1,2").split(",") if x.strip()]
 SPOT_IDS = [int(x) for x in os.getenv("SPOT_IDS", "1,2,3,4,5").split(",") if x.strip()]
 PUBLISH_INTERVAL_SECONDS = float(os.getenv("PUBLISH_INTERVAL_SECONDS", "5"))
 EVENTS_PER_BATCH = int(os.getenv("EVENTS_PER_BATCH", "1"))
-EVENT_COUNT = int(os.getenv("EVENT_COUNT", "0"))
+EVENT_COUNT = int(os.getenv("EVENT_COUNT", "10"))
 
 STATUSES = ["occupied", "available"]
 
