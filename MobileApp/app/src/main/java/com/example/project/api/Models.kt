@@ -30,8 +30,8 @@ data class LoginResponse(
 
 @Serializable
 data class ParkingLotInfo(
-    val id: String,
-    val name: String,
+    val lot_id: String,
+    val lot_name: String,
     val address: String
 )
 

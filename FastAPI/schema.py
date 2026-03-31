@@ -7,19 +7,19 @@ class UserReservationsRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     user_id: str
-    lot_ids: List[int]
+    lot_ids: List[str]
     start_time: str  # ISO 8601
     end_time: str    # ISO 8601
 
 class LotOccupancyResult(BaseModel):
-    lot_id: int
+    lot_id: str
     total_spots: int
     occupied_spots: int
     reserved_spots: int
     available_spots: int
 
 class LotSearchResult(BaseModel):
-    lot_id: int
+    lot_id: str
     available_spots: int
     price_per_hour: float
     event_id: str
@@ -39,7 +39,7 @@ class ParkingLotInfo(BaseModel):
 # Booking request model for /book endpoint
 class BookingRequest(BaseModel):
     event_id: str
-    lot_id: int
+    lot_id: str
     user_id: str  # or int, depending on your user id type
     start_time: str  # ISO 8601
     end_time: str    # ISO 8601

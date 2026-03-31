@@ -237,10 +237,10 @@ fun ParkingLotListScreen(onLotSelected: (String) -> Unit, onViewReservations: ()
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(8.dp)
-                            .clickable { onLotSelected(lot.id) }
+                            .clickable { onLotSelected(lot.lot_id) }
                     ) {
                         Column(modifier = Modifier.padding(16.dp)) {
-                            Text(lot.name, fontWeight = FontWeight.Bold)
+                            Text(lot.lot_name, fontWeight = FontWeight.Bold)
                             Text(lot.address, style = MaterialTheme.typography.bodyMedium)
                         }
                     }

@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import logging
 from schema import UserReservationsRequest
 from schema import ParkingLotInfo
 from schema import SearchRequest, LotSearchResult, SearchResponse
@@ -9,7 +10,8 @@ from backend.pricing_client import PricingClient
 from typing import List
 
 app = FastAPI(title="Smart Parking Backend API")
-
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 inventory_client = InventoryClient()
 pricing_client = PricingClient()
 
@@ -60,16 +62,18 @@ def list_parking_lots():
 def search_lots(request: SearchRequest) -> SearchResponse:
     results = []
     for lot_id in request.lot_ids:
-        occ = inventory_client.get_lot_occupancy(lot_id)
+        occ = inventory_client.get_lot_occupancy(int(lot_id))
         if occ.available_spots > 0:
-            price, event_id = pricing_client.get_price(lot_id, request.user_id, request.start_time, request.end_time)
+            price, event_id = pricing_client.get_price(int(lot_id), request.user_id, request.start_time, request.end_time)
             results.append(LotSearchResult(
                 lot_id=lot_id,
                 available_spots=occ.available_spots,
                 price_per_hour=price,
                 event_id=event_id,
             ))
-    return SearchResponse(results=results)
+    response = SearchResponse(results=results)
+    logger.info("SearchResponse: %s", response.json())  # Debug
+    return response
 
 # Booking endpoint
 # My thought was that this would come immediately after search
@@ -80,7 +84,7 @@ def book_lot(request: BookingRequest):
     if request.is_booking:
         response = inventory_client.reserve_spot(
             user_id=request.user_id,
-            lot_id=request.lot_id,
+            lot_id=int(request.lot_id),
             event_id=request.event_id,
             start_time=request.start_time,
             end_time=request.end_time,

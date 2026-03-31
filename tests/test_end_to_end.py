@@ -39,7 +39,7 @@ def test_end_to_end():
     future_end = (datetime.utcnow() + timedelta(hours=4)).replace(microsecond=0).isoformat() + "Z"
     search = requests.post(f"{BASE_URL}/search", json={
         "user_id": user1_id,
-        "lot_ids": [int(lot_id)],
+        "lot_ids": [str(lot_id)],
         "start_time": future_start,
         "end_time": future_end
     }).json()
@@ -52,7 +52,7 @@ def test_end_to_end():
     # 4. User 1 books a spot
     book_resp = requests.post(f"{BASE_URL}/book", json={
         "event_id": event_id,
-        "lot_id": int(lot_id),
+        "lot_id": str(lot_id),
         "user_id": user1_id,
         "start_time": future_start,
         "end_time": future_end,
@@ -66,7 +66,7 @@ def test_end_to_end():
     # 5. User 2 searches for spots
     search2 = requests.post(f"{BASE_URL}/search", json={
         "user_id": user2_id,
-        "lot_ids": [int(lot_id)],
+        "lot_ids": [str(lot_id)],
         "start_time": future_start,
         "end_time": future_end
     }).json()
@@ -77,7 +77,7 @@ def test_end_to_end():
     # 5. User 2 declines (using their own event_id)
     decline_resp = requests.post(f"{BASE_URL}/book", json={
         "event_id": event_id2,
-        "lot_id": int(lot_id),
+        "lot_id": str(lot_id),
         "user_id": user2_id,
         "start_time": future_start,
         "end_time": future_end,

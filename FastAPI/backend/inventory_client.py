@@ -18,7 +18,7 @@ class InventoryClient:
         request = inventory_pb2.GetLotOccupancyRequest(lot_id=str(lot_id))
         response = self.stub.GetLotOccupancy(request)
         return LotOccupancyResult(
-            lot_id=int(response.lot_id),
+            lot_id=str(response.lot_id),
             total_spots=response.total_spots,
             occupied_spots=response.occupied_spots,
             reserved_spots=response.reserved_spots,

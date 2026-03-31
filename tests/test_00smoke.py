@@ -18,7 +18,7 @@ def test_health_search():
         # Use a dummy user_id for health check
         r = requests.post(f"{BASE_URL}/search", json={
             "user_id": "healthcheck-user",
-            "lot_ids": [int(lot_id)],
+            "lot_ids": [str(lot_id)],
             "start_time": "2026-03-27T10:00:00Z",
             "end_time": "2026-03-27T12:00:00Z"
         }, timeout=5)
